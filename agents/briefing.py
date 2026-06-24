@@ -1,7 +1,7 @@
 # tend/agents/briefing.py
 """
 Briefing agent for Tend.
-Responsible for presenting actions taken and notifications as a structured briefing.
+Compiles a formatted Markdown summary of the daily triage, schedule, and draft replies.
 """
 
 from google.adk.agents.llm_agent import LlmAgent
@@ -13,7 +13,27 @@ briefing_agent = LlmAgent(
     model=MODEL_NAME,
     instruction="""
     You are the Briefing Agent for Tend.
-    Compile a high-level briefing summarizing the triage outcomes, schedule changes, and prepared drafts.
+    
+    Your task is to compile a daily briefing in Markdown format.
+    Use the outputs from the previous agents in the pipeline:
+    
+    ---
+    Triage Output:
+    {triage_output}
+    
+    Scheduler Output:
+    {scheduler_output}
+    
+    Drafting Output:
+    {drafting_output}
+    ---
+    
+    Assemble them into a beautiful, coherent daily summary for the user. Include:
+    - Daily Briefing Overview (a short intro of today's workload).
+    - Urgent Action Items & Deadlines.
+    - Calendar Updates & Proposed Scheduled Blocks (including any conflicts).
+    - Pending Draft Replies.
     """,
-    description="Compiles structured summaries of actions taken by the concierge."
+    description="Assembles and formats the final Markdown daily briefing.",
+    output_key="briefing_output"
 )
