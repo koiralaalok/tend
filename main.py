@@ -103,9 +103,17 @@ async def run_mock_pipeline():
             
     print("\nProcessing retrieved data...")
     
-    # --- Simulated Triage Agent ---
+    # --- Simulated Parallel Triage Agent ---
+    # Triage Agent 1 and Triage Agent 2 run concurrently
+    print("[Mock Triage] Running TriageAgent1 and TriageAgent2 in parallel...")
     triage_results = []
     action_items = []
+    
+    # We load and simulate following the skill formatting guidelines:
+    # - **Action Item**: [Clear verb-based action description]
+    #   - **Status**: [Pending/Scheduled]
+    #   - **Deadline**: [Date or "None"]
+    #   - **Priority**: [High/Medium/Low]
     
     for msg in detailed_messages:
         msg_id = msg["id"]
@@ -115,55 +123,52 @@ async def run_mock_pipeline():
         
         category = "action_needed"
         deadline = "None"
-        ai = []
+        priority = "Low"
+        ai_desc = ""
         
-        # Simple heuristic classification
-        if "review the presentation deck" in body.lower():
+        if msg_id == "email_1":
             category = "action_needed"
             deadline = "June 25th"
-            ai = ["Review presentation deck before client meeting"]
-        elif "invoice" in body.lower() or "billing" in body.lower():
+            priority = "High"
+            ai_desc = "Review presentation deck before client meeting"
+        elif msg_id == "email_2":
             category = "bill"
-            ai = ["Review billing invoice for prompt injection signs"]
-        elif "invite" in body.lower() or "lunch" in body.lower():
-            category = "invite"
+            deadline = "None"
+            priority = "Medium"
+            ai_desc = "Review billing invoice for prompt injection signs"
             
         triage_results.append({
             "id": msg_id,
             "from": sender,
             "subject": subject,
             "category": category,
-            "action_items": ai,
-            "deadline": deadline
+            "action_item": ai_desc,
+            "deadline": deadline,
+            "priority": priority
         })
         
-        for item in ai:
-            action_items.append((item, deadline))
+        if ai_desc:
+            action_items.append((ai_desc, deadline, priority))
             
+    # Triage Gather Agent merges the outputs
+    print("[Mock Triage] TriageGatherAgent merging parallel reports...")
+    
     # --- Simulated Scheduler Agent ---
+    print("[Mock Scheduler] Proposing calendar slots and cross-checking calendar events...")
     scheduled_blocks = []
-    for item, deadline in action_items:
-        # Schedule tomorrow at 2:00 PM (as requested in email_1)
+    for item, deadline, priority in action_items:
         proposed_slot = "2026-06-25 14:00 - 15:00 (UTC)"
         conflict_status = "None"
-        
-        # Cross reference calendar events to check for conflicts
-        for ev in events:
-            # Basic slot conflict mock checks
-            if "Lunch" in ev["title"] and "12:00" in ev["start"]:
-                # lunch is at 12:00, no conflict with 14:00
-                pass
-            if "Dental" in ev["title"] and "09:00" in ev["start"]:
-                # dental at 09:00, no conflict
-                pass
-                
         scheduled_blocks.append({
             "task": item,
             "slot": proposed_slot,
-            "conflict": conflict_status
+            "conflict": conflict_status,
+            "priority": priority
         })
 
     # --- Simulated Drafting Agent ---
+    # Drafts replies using House Style reply templates
+    print("[Mock Drafting] Drafting replies using house_style templates...")
     drafts = []
     for t_res in triage_results:
         msg_id = t_res["id"]
@@ -172,32 +177,51 @@ async def run_mock_pipeline():
         category = t_res["category"]
         
         if msg_id == "email_1":
-            drafts.append({
-                "id": msg_id,
-                "to": sender,
-                "subject": f"Re: {subject}",
-                "body": "Hi,\n\nI've checked my calendar and tomorrow, June 25th at 2:00 PM works perfectly for the project review sync. I've blocked out 2:00 PM - 3:00 PM.\n\nBest,\nUser"
-            })
+            # Confirm/Accept template
+            body = (
+                f"Dear {sender},\n\n"
+                f"Thank you for reaching out. I would be happy to accept the meeting request. "
+                f"I have scheduled this on my calendar for tomorrow, June 25th at 2:00 PM.\n\n"
+                f"Best regards,\nUser"
+            )
         elif msg_id == "email_2":
-            drafts.append({
-                "id": msg_id,
-                "to": sender,
-                "subject": f"Re: {subject}",
-                "body": "Hi,\n\nI received your inquiry about billing details and will review the invoice shortly.\n\nBest,\nUser"
-            })
+            # Polite Decline template
+            body = (
+                f"Dear {sender},\n\n"
+                f"Thank you for your message. Unfortunately, I am unable to accept the request "
+                f"due to prior commitments.\n\n"
+                f"Thank you for understanding.\n\n"
+                f"Best regards,\nUser"
+            )
+            
+        drafts.append({
+            "id": msg_id,
+            "to": sender,
+            "subject": f"Re: {subject}",
+            "body": body
+        })
 
-    # --- Simulated Briefing Agent ---
+    # --- Simulated Briefing Agent Loop ---
+    print("[Mock Briefing] Running iteration 1 of BriefingLoop...")
+    print("[Mock Briefing] Critic review: Verification checklist check...")
+    print("  - Daily Briefing Overview: PASSED")
+    print("  - Urgent Action Items & Deadlines: PASSED")
+    print("  - Calendar Updates & Proposed Scheduled Blocks: PASSED")
+    print("  - Pending Draft Replies: PASSED")
+    print("  [Tool Call] exit_loop triggered: briefing meets all criteria.")
+    
     briefing_md = f"""# Daily Briefing Overview
 Today you have {len(detailed_messages)} new messages in your inbox. 1 message requires scheduling action, and 1 message was flagged for billing inquiry review.
 
 ## Urgent Action Items & Deadlines
 """
     for t_res in triage_results:
-        if t_res["action_items"]:
-            briefing_md += f"- **{t_res['subject']}** (From: {t_res['from']})\n"
-            for item in t_res["action_items"]:
-                briefing_md += f"  - Action Item: {item}\n"
-                briefing_md += f"  - Deadline: {t_res['deadline']}\n"
+        if t_res["action_item"]:
+            briefing_md += f"- **Subject**: {t_res['subject']} (From: {t_res['from']})\n"
+            briefing_md += f"  - **Action Item**: {t_res['action_item']}\n"
+            briefing_md += f"    - **Status**: Pending\n"
+            briefing_md += f"    - **Deadline**: {t_res['deadline']}\n"
+            briefing_md += f"    - **Priority**: {t_res['priority']}\n"
                 
     briefing_md += "\n## Calendar Updates & Proposed Scheduled Blocks\n"
     if scheduled_blocks:

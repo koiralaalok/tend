@@ -1,18 +1,50 @@
 ---
 name: house_style
-description: Guidelines for extracting action items and defining reply email tone.
+description: Exact formats for action item extraction and reply tone templates.
 ---
 
 # House Style Guidelines
 
-Follow these guidelines for writing emails and presenting information to the user:
+## Extracted Action Items Format
+When extracting action items, you MUST format them exactly as a Markdown list matching this structure:
+- **Action Item**: [Clear verb-based action description]
+  - **Status**: [Pending/Scheduled]
+  - **Deadline**: [Date or "None"]
+  - **Priority**: [High/Medium/Low]
 
-## Action-Item Extraction
-- Be explicit, clear, and action-oriented.
-- Highlight deadlines, owners, and expected outcomes.
-- Present action items in bullet points at the top of the summary.
+## Reply Tone Templates
+When drafting reply emails, classify the response type into one of the three templates and follow the corresponding tone:
 
-## Reply Tone
-- Professional, concise, and helpful.
-- Respect user privacy.
-- Do not assume answers to ambiguous details; list them as questions for clarification.
+### 1. Confirm/Accept
+- **Tone**: Professional, appreciative, and clear.
+- **Template**:
+  "Dear [Name],
+  
+  Thank you for reaching out. I would be happy to [accept/confirm the meeting/request]. I have scheduled this on my calendar for [Date/Time].
+  
+  Best regards,
+  [User]"
+
+### 2. Polite Decline
+- **Tone**: Respectful, brief, and clear.
+- **Template**:
+  "Dear [Name],
+  
+  Thank you for your message. Unfortunately, I am unable to [accept the invitation/request] due to prior commitments. 
+  
+  Thank you for understanding.
+  
+  Best regards,
+  [User]"
+
+### 3. Ask-for-More-Info
+- **Tone**: Inquisitive, polite, and specific.
+- **Template**:
+  "Dear [Name],
+  
+  Thank you for your message regarding [Subject]. To help me proceed, could you please provide more information about [specific question/detail]?
+  
+  I look forward to hearing from you.
+  
+  Best regards,
+  [User]"
