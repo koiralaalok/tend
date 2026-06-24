@@ -18,6 +18,7 @@ from google.adk.runners import InMemoryRunner
 
 # Import orchestrator
 from tend.agents.orchestrator import orchestrator
+from tend.security.guardrails import SecurityGuardrailPlugin
 
 # Import MCP Client SDK for mocked pipeline
 from mcp import ClientSession, StdioServerParameters
@@ -27,7 +28,9 @@ from mcp.client.stdio import stdio_client
 async def run_real_pipeline():
     print("GEMINI_API_KEY found. Running the actual ADK SequentialAgent pipeline...\n")
     
-    runner = InMemoryRunner(agent=orchestrator, app_name="Tend")
+    runner = InMemoryRunner(
+        agent=orchestrator, app_name="Tend", plugins=[SecurityGuardrailPlugin()]
+    )
     
     # We pass a simple instruction to trigger the orchestrator
     user_msg = types.Content(

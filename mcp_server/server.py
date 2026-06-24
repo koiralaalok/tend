@@ -115,6 +115,38 @@ def list_events(date_range: Optional[str] = None) -> List[Dict[str, Any]]:
             return events
     except Exception:
         return []
+ALLOWLIST = ["manager@company.com", "user@tend.local"]
+
+
+@mcp.tool()
+def send_email(
+    to: str, subject: str, body: str, confirm: bool = False
+) -> Dict[str, Any]:
+    """
+    Send an email. Requires recipient allowlist validation and human confirmation.
+
+    Args:
+        to: Recipient email address.
+        subject: Email subject line.
+        body: Email content body.
+        confirm: Confirmation flag. Must be explicitly set to True by a human to authorize sending.
+    """
+    if to not in ALLOWLIST:
+        return {
+            "status": "error",
+            "message": f"Blocked: Recipient '{to}' is not in the configured allowlist.",
+        }
+
+    if not confirm:
+        return {
+            "status": "error",
+            "message": "Blocked: Send action requires explicit human-in-the-loop confirmation (confirm=True).",
+        }
+
+    return {
+        "status": "success",
+        "message": f"Email successfully sent to {to}.",
+    }
 
 
 if __name__ == "__main__":
