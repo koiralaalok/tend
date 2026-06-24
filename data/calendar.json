@@ -1,1 +1,18 @@
-[]
+[
+  {
+    "id": "event_1",
+    "title": "Dental Cleaning",
+    "start": "2026-06-25T09:00:00Z",
+    "end": "2026-06-25T10:00:00Z",
+    "description": "Routine checkup at dentist.",
+    "location": "Downtown Dental"
+  },
+  {
+    "id": "event_2",
+    "title": "Lunch with Alice",
+    "start": "2026-06-25T12:00:00Z",
+    "end": "2026-06-25T13:00:00Z",
+    "description": "Catch up lunch.",
+    "location": "Bistro"
+  }
+]
